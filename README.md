@@ -42,9 +42,9 @@ slapd (root LaunchDaemon)                     HorseBar.app (menu bar, your user)
   "impact 0.42"                                                       → AVAudioPlayer
 ```
 
-- `SlapMac/Sources/SlapCore` — sensor reader and slap detector
-- `SlapMac/Sources/slapd` — root daemon, broadcasts `impact <g>` lines over a Unix socket
-- `SlapMac/Sources/HorseBar` — SwiftUI menu bar app
+- `Sources/SlapCore` — sensor reader and slap detector
+- `Sources/slapd` — root daemon, broadcasts `impact <g>` lines over a Unix socket
+- `Sources/HorseBar` — SwiftUI menu bar app
 - `prototype/slap.py` — quick Python prototype using [macimu](https://github.com/olvvier/apple-silicon-accelerometer)
 
 The interface is undocumented, so a future macOS update could break it.

@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "SlapMac",
+    name: "HorseBar",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "slapd", targets: ["slapd"]),

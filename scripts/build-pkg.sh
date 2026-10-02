@@ -5,10 +5,10 @@ set -euo pipefail
 export COPYFILE_DISABLE=1   # no ._ AppleDouble files in the payload
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PKG="$ROOT/scripts/pkg"
-WORK="$ROOT/SlapMac/.build/pkg"
-VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$ROOT/SlapMac/Resources/Info.plist")
+WORK="$ROOT/.build/pkg"
+VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$ROOT/Resources/Info.plist")
 
-cd "$ROOT/SlapMac"
+cd "$ROOT"
 swift build -c release --arch arm64
 BIN=$(swift build -c release --arch arm64 --show-bin-path)
 
