@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>HorseBar</title>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true" hostArchitectures="arm64"/>
+    <domains enable_localSystem="true" enable_currentUserHome="false" enable_anywhere="false"/>
+    <volume-check>
+        <allowed-os-versions><os-version min="14.0"/></allowed-os-versions>
+    </volume-check>
+    <choices-outline><line choice="default"/></choices-outline>
+    <choice id="default" title="HorseBar"><pkg-ref id="com.theglanda.horsebar.pkg"/></choice>
+    <pkg-ref id="com.theglanda.horsebar.pkg" version="__VERSION__" onConclusion="none">horsebar-component.pkg</pkg-ref>
+</installer-gui-script>

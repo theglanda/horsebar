@@ -1,0 +1,14 @@
+#!/bin/bash
+PLIST=/Library/LaunchDaemons/com.theglanda.slapd.plist
+/usr/sbin/chown root:wheel "$PLIST"
+/bin/chmod 644 "$PLIST"
+/bin/launchctl bootout system/com.theglanda.slapd 2>/dev/null
+/bin/launchctl bootstrap system "$PLIST"
+
+# Launch the menu bar app for the logged-in user.
+USER_NAME=$(/usr/bin/stat -f%Su /dev/console)
+if [ -n "$USER_NAME" ] && [ "$USER_NAME" != "root" ]; then
+    USER_ID=$(/usr/bin/id -u "$USER_NAME")
+    /bin/launchctl asuser "$USER_ID" /usr/bin/sudo -u "$USER_NAME" /usr/bin/open -a /Applications/HorseBar.app
+fi
+exit 0

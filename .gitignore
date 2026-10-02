@@ -1,0 +1,5 @@
+.venv/
+SlapMac/.build/
+.DS_Store
+dist/
+sounds-private/

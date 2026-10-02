@@ -1,0 +1,10 @@
+#!/bin/bash
+# Refuse to install on Macs without the SPU accelerometer (base M1, Intel).
+if ! /usr/sbin/ioreg -r -c AppleSPUHIDDevice -d 1 | /usr/bin/grep -q '"PrimaryUsage" = 3'; then
+    echo "HorseBar: this Mac has no motion sensor (needs M1 Pro / M2 or newer)" >&2
+    exit 1
+fi
+# Stop a previous version so its files can be replaced.
+/bin/launchctl bootout system/com.theglanda.slapd 2>/dev/null
+/usr/bin/pkill -x HorseBar 2>/dev/null
+exit 0
