@@ -50,6 +50,7 @@ final class SlapModel: ObservableObject {
         client.onConnectionChange = { [weak self] in self?.connected = $0 }
         client.onImpact = { [weak self] in self?.handle($0) }
         client.start()
+        migrateSoundNames()
         seedSounds()
         reloadSounds()
         if !didFirstLaunch {
@@ -64,6 +65,44 @@ final class SlapModel: ObservableObject {
     }
 
     /// Copies the sounds shipped inside the app into the user's folder on first run.
+    /// Old file name → new one, for sounds renamed in 1.2.
+    private static let renamedSounds = [
+        "dragon-studio-horse-neigh-390297.mp3": "horse-neigh.mp3",
+        "anime-girl-voice.mp3": "anime-girl.mp3",
+        "chicken-on-tree-screaming.mp3": "chicken-scream.mp3",
+        "error_CDOxCYm.mp3": "error.mp3",
+        "fahhh_KcgAXfs.mp3": "fahhh.mp3",
+        "freesound_community-funny-yay-6273.mp3": "yay.mp3",
+        "m-e-o-w.mp3": "meow.mp3",
+        "movie_1.mp3": "movie.mp3",
+        "perfect-fart.mp3": "fart.mp3",
+        "safeyable-efek-suara-funny-putri-lucu-180275.mp3": "funny-princess.mp3",
+        "slap-soundmaster13-49669815_4L20wGP.mp3": "slap.mp3",
+        "studio-audience-awwww-sound-fx.mp3": "audience-aww.mp3",
+        "sugoi-sugoi.mp3": "sugoi.mp3",
+        "tindeck_1.mp3": "tindeck.mp3",
+        "uwu-discord-gorl.mp3": "uwu.mp3",
+        "yes-lara-voice.mp3": "yes-lara.mp3",
+        "maro-jump-sound-effect_1.mp3": "mario-jump.mp3",
+        "michael-jackson-hee-hee.mp3": "hee-hee.mp3",
+    ]
+
+    /// Renames old sound files in the user's folder and keeps the selected sound selected.
+    private func migrateSoundNames() {
+        let fm = FileManager.default
+        let dest = Self.defaultSoundsFolder
+        var seeded = seededSounds.split(separator: "\n").map(String.init)
+        for (old, new) in Self.renamedSounds {
+            let from = dest.appendingPathComponent(old), to = dest.appendingPathComponent(new)
+            if fm.fileExists(atPath: from.path), !fm.fileExists(atPath: to.path) {
+                try? fm.moveItem(at: from, to: to)
+            }
+            seeded = seeded.map { $0 == old ? new : $0 }
+            if selectedSound == old { selectedSound = new }
+        }
+        if !seededSounds.isEmpty { seededSounds = seeded.joined(separator: "\n") }
+    }
+
     /// Copies bundled sounds into the user's folder: all of them on first run,
     /// and only new ones after an update.
     private func seedSounds() {
@@ -371,6 +410,14 @@ struct ImpactMeter: View {
 }
 
 struct SoundRow: View {
+    /// "horse-neigh.mp3" → "Horse Neigh"
+    static func displayName(_ url: URL) -> String {
+        url.deletingPathExtension().lastPathComponent
+            .replacingOccurrences(of: "-", with: " ")
+            .replacingOccurrences(of: "_", with: " ")
+            .capitalized
+    }
+
     let url: URL
     let selectable: Bool
     let selected: Bool
@@ -383,7 +430,7 @@ struct SoundRow: View {
                 Image(systemName: selected ? "largecircle.fill.circle" : "circle")
                     .foregroundStyle(selected ? Color.accentColor : .secondary)
             }
-            Text(url.deletingPathExtension().lastPathComponent)
+            Text(Self.displayName(url))
                 .lineLimit(1).truncationMode(.middle)
             Spacer()
             Button(action: onPlay) { Image(systemName: "play.fill") }
