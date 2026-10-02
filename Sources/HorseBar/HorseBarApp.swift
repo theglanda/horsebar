@@ -19,6 +19,8 @@ final class SlapModel: ObservableObject {
     @AppStorage("selectedSound") var selectedSound = ""
     @AppStorage("soundsFolder") var soundsFolder = SlapModel.defaultSoundsFolder.path
     @AppStorage("didFirstLaunch") private var didFirstLaunch = false
+    /// Bundled sounds already copied to the user's folder, so deleted ones don't come back.
+    @AppStorage("seededSounds") private var seededSounds = ""
 
     /// ~/Library/Application Support/HorseBar/Sounds — seeded with the bundled sounds.
     static let defaultSoundsFolder = FileManager.default
@@ -53,19 +55,32 @@ final class SlapModel: ObservableObject {
         if !didFirstLaunch {
             didFirstLaunch = true
             openAtLogin = true
+            // the signature sound: start with the horse
+            if let horse = sounds.first(where: { $0.lastPathComponent.lowercased().contains("horse") }) {
+                soundMode = .fixed
+                selectedSound = horse.lastPathComponent
+            }
         }
     }
 
     /// Copies the sounds shipped inside the app into the user's folder on first run.
+    /// Copies bundled sounds into the user's folder: all of them on first run,
+    /// and only new ones after an update.
     private func seedSounds() {
         let fm = FileManager.default
         let dest = Self.defaultSoundsFolder
-        guard !fm.fileExists(atPath: dest.path),
-              let bundled = Bundle.main.resourceURL?.appendingPathComponent("Sounds") else { return }
+        guard let bundled = Bundle.main.resourceURL?.appendingPathComponent("Sounds") else { return }
         try? fm.createDirectory(at: dest, withIntermediateDirectories: true)
-        for url in player.files(in: bundled) {
-            try? fm.copyItem(at: url, to: dest.appendingPathComponent(url.lastPathComponent))
+        var seeded = Set(seededSounds.split(separator: "\n").map(String.init))
+        if seeded.isEmpty {
+            // installs from before this list existed: whatever is in the folder counts as seeded
+            seeded = Set(player.files(in: dest).map(\.lastPathComponent))
         }
+        for url in player.files(in: bundled) where !seeded.contains(url.lastPathComponent) {
+            try? fm.copyItem(at: url, to: dest.appendingPathComponent(url.lastPathComponent))
+            seeded.insert(url.lastPathComponent)
+        }
+        seededSounds = seeded.sorted().joined(separator: "\n")
     }
 
     var openAtLogin: Bool {
